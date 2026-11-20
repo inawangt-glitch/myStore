@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>จัดการระบบ (ผู้ดูแล) — ร้านยาจำลอง</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-canvas: #121212;
+      --bg-card: #181818;
+      --bg-input: #222222;
+      --bg-house: #1e3932;
+      --accent-green: #1ed760;
+      --accent-green-hover: #25e86a;
+      --warn-orange: #ffa42b;
+      --error-red: #f3727f;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --border-subtle: #2e2e2e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      letter-spacing: -0.01em;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 20px 16px 48px;
+    }
+
+    .header-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .header-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .header-meta {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+
+    .disclaimer-pill {
+      display: inline-block;
+      background-color: rgba(30, 215, 96, 0.14);
+      color: var(--accent-green);
+      border: 1px solid rgba(30, 215, 96, 0.4);
+      border-radius: 50px;
+      padding: 6px 14px;
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .btn-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 10px 20px;
+      border-radius: 50px;
+      background-color: #242424;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      border: 1px solid #3c3c3c;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .btn-pill:hover:not(:disabled) {
+      background-color: #2f2f2f;
+    }
+
+    .btn-pill:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    .btn-pill:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--accent-green);
+      color: #121212;
+      border-color: var(--accent-green);
+      font-weight: 700;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--accent-green-hover);
+    }
+
+    .fallback-banner {
+      display: none;
+      background-color: var(--warn-orange);
+      color: #121212;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      margin: 0 0 12px;
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .auth-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+    }
+
+    input[type="password"],
+    input[type="text"],
+    select {
+      min-height: 50px;
+      padding: 10px 14px;
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background-color: var(--bg-input);
+      border: 1.5px solid #3c3c3c;
+      border-radius: 10px;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: var(--accent-green);
+    }
+
+    .status-msg {
+      margin-top: 12px;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 16px;
+      display: none;
+    }
+
+    .status-ok {
+      display: block;
+      background-color: rgba(30, 215, 96, 0.14);
+      border: 1px solid var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .status-err {
+      display: block;
+      background-color: rgba(243, 114, 127, 0.14);
+      border: 1px solid var(--error-red);
+      color: var(--error-red);
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      min-height: 48px;
+      padding: 10px 20px;
+      border-radius: 50px;
+      border: 1.5px solid #3c3c3c;
+      background-color: var(--bg-card);
+      color: var(--text-secondary);
+      font-family: 'Noto Sans Thai', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background-color: var(--bg-house);
+      border-color: var(--accent-green);
+      color: var(--accent-green);
+    }
+
+    .tab-btn:active {
+      transform: scale(0.95);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toolbar-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--text-secondary);
+      font-weight: 600;
+    }
+
+    .badge-warn {
+      display: inline-block;
+      background-color: var(--warn-orange);
+      color: #121212;
+      border-radius: 50px;
+      padding: 2px 10px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .badge-ok {
+      display: inline-block;
+      background-color: rgba(30, 215, 96, 0.16);
+      color: var(--accent-green);
+      border-radius: 50px;
+      padding: 2px 10px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .muted {
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header class="header-card">
+      <div>
+        <h1 class="header-title">จัดการระบบ (ผู้ดูแล)</h1>
+        <div class="header-meta">
+          วันอ้างอิง (as_of): <strong id="asOfDisplay">-</strong>
+        </div>
+      </div>
+      <div class="disclaimer-pill">ข้อมูลจำลอง ห้ามใส่ชื่อผู้ป่วยจริง</div>
+      <a class="btn-pill" href="index.html">กลับหน้าแรก</a>
+    </header>
+
+    <div id="fallbackBanner" class="fallback-banner" role="alert">
+      ข้อมูลสำรอง — โหลดข้อมูลจากไฟล์สำรอง (ไม่ใช่ข้อมูลล่าสุดจากเซิร์ฟเวอร์)
+    </div>
+
+    <!-- กล่องยืนยันรหัสผู้ดูแล -->
+    <section class="card" aria-label="ยืนยันรหัสผู้ดูแล">
+      <h2 class="card-title">ยืนยันรหัสผู้ดูแลระบบ</h2>
+      <div class="auth-row">
+        <input id="adminCodeInput" type="password" autocomplete="current-password" placeholder="กรอกรหัสผู้ดูแล" />
+        <button id="verifyAdminBtn" class="btn-pill btn-primary" type="button">ยืนยันรหัสผู้ดูแล</button>
+        <button id="refreshDataBtn" class="btn-pill" type="button">รีเฟรชข้อมูล</button>
+      </div>
+      <div id="authStatusBox" class="status-msg" role="status"></div>
+    </section>
+
+    <!-- แท็บสลับมุมมองข้อมูล -->
+    <div class="tabs" role="tablist">
+      <button type="button" class="tab-btn active" data-tab="drugs">บัญชียา</button>
+      <button type="button" class="tab-btn" data-tab="stock">คลังรายล็อต</button>
+      <button type="button" class="tab-btn" data-tab="dispense">รายการจ่าย</button>
+    </div>
+
+    <!-- ตารางข้อมูลหลัก -->
+    <section class="card" aria-label="ตารางข้อมูลผู้ดูแล">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input id="searchInput" type="text" placeholder="ค้นหา SKU, ชื่อยา, ล็อต หรือรหัส..." />
+          <select id="filterSelect"></select>
+        </div>
+        <div id="rowCountText" class="muted">0 รายการ</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead id="adminTableHead"></thead>
+          <tbody id="adminTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // สถานะข้อมูลและสิทธิ์ผู้ดูแลในหน้า
+    const state = {
+      asOf: '',
+      drugs: [],
+      stock: [],
+      dispenseLog: [],
+      isFallback: false,
+      isVerified: false,
+      activeTab: 'drugs',
+      isBusy: false
+    };
+
+    const els = {
+      asOfDisplay: document.getElementById('asOfDisplay'),
+      fallbackBanner: document.getElementById('fallbackBanner'),
+      adminCodeInput: document.getElementById('adminCodeInput'),
+      verifyAdminBtn: document.getElementById('verifyAdminBtn'),
+      refreshDataBtn: document.getElementById('refreshDataBtn'),
+      authStatusBox: document.getElementById('authStatusBox'),
+      searchInput: document.getElementById('searchInput'),
+      filterSelect: document.getElementById('filterSelect'),
+      rowCountText: document.getElementById('rowCountText'),
+      adminTableHead: document.getElementById('adminTableHead'),
+      adminTableBody: document.getElementById('adminTableBody')
+    };
+
+    function setAuthMessage(text, isError) {
+      els.authStatusBox.textContent = text;
+      els.authStatusBox.className = 'status-msg ' + (isError ? 'status-err' : 'status-ok');
+    }
+
+    function isValidDataPayload(data) {
+      return Boolean(
+        data &&
+        data.drugs && Array.isArray(data.drugs.items) &&
+        data.stock && data.stock.meta && typeof data.stock.meta.as_of === 'string' &&
+        Array.isArray(data.stock.items) &&
+        data.dispense_log && Array.isArray(data.dispense_log.items)
+      );
+    }
+
+    // ขั้นตอนที่ 1: โหลดข้อมูลจาก /api/data พร้อม timeout 8 วินาที และสำรองไปที่ไฟล์ JSON หากล้มเหลว
+    async function loadAdminData() {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
+
+      try {
+        // ดึงข้อมูลหลักจาก endpoint /api/data
+        const res = await fetch('/api/data', {
+          method: 'GET',
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+
+        if (!res.ok) {
+          throw new Error('HTTP ' + res.status);
+        }
+
+        const data = await res.json();
+        if (!isValidDataPayload(data)) {
+          throw new Error('โครงสร้างข้อมูลไม่ครบถ้วน');
+        }
+
+        state.isFallback = false;
+        state.asOf = data.stock.meta.as_of.slice(0, 10);
+        state.drugs = data.drugs.items;
+        state.stock = data.stock.items;
+        state.dispenseLog = data.dispense_log.items;
+        els.fallbackBanner.style.display = 'none';
+      } catch (err) {
+        clearTimeout(timer);
+        // สำรองไปที่ไฟล์ JSON เมื่อเรียก /api/data ไม่สำเร็จ
+        const [drugsRes, stockRes, logRes] = await Promise.all([
+          fetch('drugs.json', { cache: 'no-store' }),
+          fetch('stock.json', { cache: 'no-store' }),
+          fetch('dispense-log.json', { cache: 'no-store' })
+        ]);
+
+        if (!drugsRes.ok || !stockRes.ok || !logRes.ok) {
+          throw new Error('ไม่สามารถโหลดไฟล์สำรองได้');
+        }
+
+        const [drugsJson, stockJson, logJson] = await Promise.all([
+          drugsRes.json(),
+          stockRes.json(),
+          logRes.json()
+        ]);
+
+        state.isFallback = true;
+        state.asOf = (stockJson && stockJson.meta && stockJson.meta.as_of)
+          ? String(stockJson.meta.as_of).slice(0, 10)
+          : '';
+        state.drugs = Array.isArray(drugsJson) ? drugsJson : (drugsJson.items || []);
+        state.stock = Array.isArray(stockJson) ? stockJson : (stockJson.items || []);
+        state.dispenseLog = Array.isArray(logJson) ? logJson : (logJson.items || []);
+        els.fallbackBanner.style.display = 'block';
+      }
+    }
+
+    // ขั้นตอนที่ 2: ตรวจสอบรหัสผู้ดูแลผ่าน API ของเซิร์ฟเวอร์โดยไม่เก็บหรือตรวจรหัสลับฝั่งไคลเอนต์
+    async function verifyAdminCode() {
+      const code = els.adminCodeInput.value.trim();
+      if (!code) {
+        setAuthMessage('กรุณากรอกรหัสผู้ดูแล', true);
+        return;
+      }
+
+      if (state.isBusy) return;
+      state.isBusy = true;
+      els.verifyAdminBtn.disabled = true;
+
+      try {
+        // ส่งรหัสผู้ดูแลไปให้ /api/admin/verify ตรวจสอบฝั่งเซิร์ฟเวอร์
+        const res = await fetch('/api/admin/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ admin_code: code })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data && data.ok === true) {
+          state.isVerified = true;
+          setAuthMessage('ยืนยันรหัสผู้ดูแลสำเร็จ สามารถดูข้อมูลจัดการระบบได้', false);
+        } else {
+          state.isVerified = false;
+          setAuthMessage((data && data.message) ? String(data.message) : 'รหัสผู้ดูแลไม่ถูกต้อง', true);
+        }
+      } catch (err) {
+        state.isVerified = false;
+        setAuthMessage('ไม่สามารถตรวจสอบรหัสผู้ดูแลกับเซิร์ฟเวอร์ได้', true);
+      } finally {
+        state.isBusy = false;
+        els.verifyAdminBtn.disabled = false;
+        renderTable();
+      }
+    }
+
+    function setupTabFilterOptions() {
+      els.filterSelect.innerHTML = '';
+      const allOpt = document.createElement('option');
+      allOpt.value = 'ALL';
+
+      if (state.activeTab === 'drugs') {
+        allOpt.textContent = 'ทุกหมวดหมู่';
+        els.filterSelect.appendChild(allOpt);
+        const cats = Array.from(new Set(state.drugs.map((d) => d.category).filter(Boolean)));
+        cats.forEach((c) => {
+          const o = document.createElement('option');
+          o.value = c;
+          o.textContent = c;
+          els.filterSelect.appendChild(o);
+        });
+      } else if (state.activeTab === 'stock') {
+        allOpt.textContent = 'ทุกสถานะล็อต';
+        els.filterSelect.appendChild(allOpt);
+        ['active', 'quarantine', 'written_off'].forEach((st) => {
+          const o = document.createElement('option');
+          o.value = st;
+          o.textContent = st;
+          els.filterSelect.appendChild(o);
+        });
+      } else {
+        allOpt.textContent = 'ทุกประเภทรายการ';
+        els.filterSelect.appendChild(allOpt);
+        ['dispense', 'void', 'return'].forEach((tp) => {
+          const o = document.createElement('option');
+          o.value = tp;
+          o.textContent = tp;
+          els.filterSelect.appendChild(o);
+        });
+      }
+    }
+
+    function renderHeaderRow(columns) {
+      els.adminTableHead.innerHTML = '';
+      const tr = document.createElement('tr');
+      columns.forEach((col) => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        tr.appendChild(th);
+      });
+      els.adminTableHead.appendChild(tr);
+    }
+
+    function renderLockedMessage() {
+      renderHeaderRow(['สถานะสิทธิ์']);
+      els.adminTableBody.innerHTML = '';
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.className = 'muted';
+      td.textContent = 'กรุณายืนยันรหัสผู้ดูแลก่อนดูข้อมูลในส่วนนี้';
+      tr.appendChild(td);
+      els.adminTableBody.appendChild(tr);
+      els.rowCountText.textContent = '0 รายการ';
+    }
+
+    function renderTable() {
+      els.asOfDisplay.textContent = state.asOf || '-';
+
+      if (!state.isVerified) {
+        renderLockedMessage();
+        return;
+      }
+
+      const q = els.searchInput.value.trim().toLowerCase();
+      const fVal = els.filterSelect.value;
+      els.adminTableBody.innerHTML = '';
+
+      if (state.activeTab === 'drugs') {
+        renderHeaderRow(['SKU', 'ชื่อสามัญทางยา', 'ความแรง', 'หน่วย', 'หมวดหมู่', 'จุดสั่งซื้อ']);
+        const filtered = state.drugs.filter((d) => {
+          if (fVal !== 'ALL' && d.category !== fVal) return false;
+          if (!q) return true;
+          const hay = `${d.sku || ''} ${d.generic_name || ''} ${d.strength || ''} ${d.category || ''}`.toLowerCase();
+          return hay.includes(q);
+        });
+
+        els.rowCountText.textContent = `${filtered.length} รายการ`;
+        if (filtered.length === 0) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 6;
+          td.className = 'muted';
+          td.textContent = 'ไม่พบรายการยา';
+          tr.appendChild(td);
+          els.adminTableBody.appendChild(tr);
+          return;
+        }
+
+        filtered.forEach((d) => {
+          const tr = document.createElement('tr');
+          [
+            d.sku || '-',
+            d.generic_name || '-',
+            d.strength || '-',
+            d.unit || '-',
+            d.category || '-',
+            String(d.reorder_level ?? 0)
+          ].forEach((val) => {
+            const td = document.createElement('td');
+            td.textContent = val;
+            tr.appendChild(td);
+          });
+          els.adminTableBody.appendChild(tr);
+        });
+      } else if (state.activeTab === 'stock') {
+        renderHeaderRow(['SKU', 'ล็อต', 'วันหมดอายุ', 'คงเหลือ', 'สถานะ']);
+        const filtered = state.stock.filter((s) => {
+          if (fVal !== 'ALL' && s.status !== fVal) return false;
+          if (!q) return true;
+          const hay = `${s.sku || ''} ${s.lot || ''} ${s.status || ''} ${s.expiry || ''}`.toLowerCase();
+          return hay.includes(q);
+        });
+
+        els.rowCountText.textContent = `${filtered.length} ล็อต`;
+        if (filtered.length === 0) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 5;
+          td.className = 'muted';
+          td.textContent = 'ไม่พบล็อตสินค้า';
+          tr.appendChild(td);
+          els.adminTableBody.appendChild(tr);
+          return;
+        }
+
+        filtered.forEach((s) => {
+          const tr = document.createElement('tr');
+          const expStr = s.expiry ? String(s.expiry).slice(0, 10) : '-';
+          const isExpired = expStr !== '-' && state.asOf && expStr < state.asOf;
+
+          const tdSku = document.createElement('td');
+          tdSku.textContent = s.sku || '-';
+
+          const tdLot = document.createElement('td');
+          tdLot.textContent = s.lot || '-';
+
+          const tdExp = document.createElement('td');
+          tdExp.textContent = expStr;
+
+          const tdQty = document.createElement('td');
+          tdQty.textContent = String(s.qty_on_hand ?? 0);
+
+          const tdStatus = document.createElement('td');
+          const badge = document.createElement('span');
+          if (s.status === 'quarantine' || isExpired) {
+            badge.className = 'badge-warn';
+            badge.textContent = isExpired ? `${s.status || 'active'} (หมดอายุ)` : s.status;
+          } else {
+            badge.className = 'badge-ok';
+            badge.textContent = s.status || 'active';
+          }
+          tdStatus.appendChild(badge);
+
+          tr.appendChild(tdSku);
+          tr.appendChild(tdLot);
+          tr.appendChild(tdExp);
+          tr.appendChild(tdQty);
+          tr.appendChild(tdStatus);
+          els.adminTableBody.appendChild(tr);
+        });
+      } else {
+        renderHeaderRow(['เวลา', 'ประเภท', 'SKU', 'ล็อต', 'จำนวน', 'ผู้ป่วย', 'เภสัชกร']);
+        const filtered = state.dispenseLog.filter((r) => {
+          if (fVal !== 'ALL' && r.type !== fVal) return false;
+          if (!q) return true;
+          const hay = `${r.sku || ''} ${r.lot || ''} ${r.patient_code || ''} ${r.pharmacist_code || ''} ${r.type || ''}`.toLowerCase();
+          return hay.includes(q);
+        });
+
+        els.rowCountText.textContent = `${filtered.length} รายการ`;
+        if (filtered.length === 0) {
+          const tr = document.createElement('tr');
+          const td = document.createElement('td');
+          td.colSpan = 7;
+          td.className = 'muted';
+          td.textContent = 'ไม่พบประวัติการจ่ายยา';
+          tr.appendChild(td);
+          els.adminTableBody.appendChild(tr);
+          return;
+        }
+
+        filtered.forEach((r) => {
+          const tr = document.createElement('tr');
+          [
+            r.datetime ? String(r.datetime).replace('T', ' ').slice(0, 16) : '-',
+            r.type || 'dispense',
+            r.sku || '-',
+            r.lot || '-',
+            String(r.qty ?? 0),
+            r.patient_code || '-',
+            r.pharmacist_code || '-'
+          ].forEach((val) => {
+            const td = document.createElement('td');
+            td.textContent = val;
+            tr.appendChild(td);
+          });
+          els.adminTableBody.appendChild(tr);
+        });
+      }
+    }
+
+    document.querySelectorAll('.tab-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        state.activeTab = btn.getAttribute('data-tab');
+        setupTabFilterOptions();
+        renderTable();
+      });
+    });
+
+    els.verifyAdminBtn.addEventListener('click', verifyAdminCode);
+    els.refreshDataBtn.addEventListener('click', async () => {
+      await loadAdminData();
+      setupTabFilterOptions();
+      renderTable();
+    });
+    els.searchInput.addEventListener('input', renderTable);
+    els.filterSelect.addEventListener('change', renderTable);
+
+    (async function init() {
+      try {
+        await loadAdminData();
+      } catch (err) {
+        state.isFallback = true;
+        els.fallbackBanner.style.display = 'block';
+      }
+      setupTabFilterOptions();
+      renderTable();
+    })();
+  </script>
+</body>
+</html>
